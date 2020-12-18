@@ -18,9 +18,8 @@ class S3Handler:
 
         self.client = boto3.client(
             's3',
-            aws_access_key_id=config['ACCESS_KEY'],
-            aws_secret_access_key=config['SECRET_KEY'],
-            aws_session_token=config['SESSION_TOKEN']
+            aws_access_key_id=config['AWS_ACCESS_KEY_ID'],
+            aws_secret_access_key=config['AWS_SECRET_ACCESS_KEY']
         )
 
 
@@ -43,6 +42,7 @@ class S3Data:
             else:
                 location = {'LocationConstraint': region}
                 self.s3_client.create_bucket(Bucket=bucket_name, CreateBucketConfiguration=location)
+            print("Bucket {} created.".format(bucket_name))
         except ClientError as e:
             print(e)
 
@@ -53,18 +53,19 @@ class S3Data:
         """
         bucket = self.s3_resource.Bucket(bucket_name)
         for obj in bucket.objects.all():
-            self.get_data(bucket_name, obj, out_file)
+            self.get_data(bucket_name, obj.key, out_file)
 
 
     def get_data(self, bucket_name, object_name, out_file):
         """
         Get data from an existing S3 bucket
         """
-        with open(out_file, 'wb') as f:
+        with open(out_file, 'ab') as f:
             self.s3_client.download_fileobj(bucket_name, object_name, f)
+            print("Object {} downloaded to {}.".format(object_name, out_file))
 
 
-    def put_data(self, file_name, bucket_name, object_name):
+    def put_data(self, bucket_name, file_name, object_name=None):
         """
         Upload a file to an S3 bucket
         """
@@ -74,13 +75,13 @@ class S3Data:
             object_name = file_name
 
         # Upload the file
-
         try:
             if bucket_name in self.s3_resource.buckets.all():
                 self.s3_client.upload_file(file_name, bucket_name, object_name)
             else:
                 self.create_bucket(bucket_name)
                 self.s3_client.upload_file(file_name, bucket_name, object_name)
+            print("File {} uploaded to {}.".format(file_name, object_name))
 
         except ClientError as e:
             print(e)

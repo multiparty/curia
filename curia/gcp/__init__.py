@@ -4,6 +4,7 @@ Establishes swift connection and returns a connection object
 """
 import os
 from google.cloud import storage
+from google.oauth2 import service_account
 
 
 class GCPHandler:
@@ -12,8 +13,9 @@ class GCPHandler:
         Returns a Swift connection object
         """
 
-        cred_str = config['GOOGLE_APPLICATION_CREDENTIALS'] or os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
-        self.storage_client = storage.Client(credentials=cred_str)
+        cred_path = config['GOOGLE_APPLICATION_CREDENTIALS'] or os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
+        credentials = service_account.Credentials.from_service_account_file(cred_path)
+        self.storage_client = storage.Client(credentials=credentials)
 
 
 class GCPData:
@@ -23,7 +25,7 @@ class GCPData:
 
     def __init__(self, config):
         self.gcp_client = GCPHandler(config).storage_client
-
+        self.cwd = os.getcwd()
 
     def create_bucket(self, bucket_name):
         """
@@ -53,13 +55,14 @@ class GCPData:
         print("Blob {} downloaded to {}.".format(file_path, out_file))
 
 
-    def get_all_data(self, bucket_name, out_file):
+    def get_all_data(self, bucket_name):
         """
         Retrieve all data from a container into a local file
         """
 
         objects = self.gcp_client.list_blobs(bucket_name)
         for blob in objects:
+            out_file = self.cwd + '/' + blob.name
             self.get_data(bucket_name, blob.name, out_file)
 
 
@@ -67,8 +70,6 @@ class GCPData:
         """
         Uploads a file to the bucket.
         """
-
-        """"""
 
         buckets = self.gcp_client.list_buckets()
         names = [b.name for b in buckets]
