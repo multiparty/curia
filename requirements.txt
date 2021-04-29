@@ -1,6 +1,5 @@
 azure-storage-blob
 boto3
 google-cloud-storage
-pyDataverse
 python-keystoneclient
 python-swiftclient
