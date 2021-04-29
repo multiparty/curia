@@ -38,7 +38,6 @@ class GCPData:
         print("Created bucket {} in {} with storage class {}".format(new_bucket.name, new_bucket.location, new_bucket.storage_class))
         return new_bucket
 
-
     def get_data(self, bucket_name, file_path, out_file):
         """
         Downloads a blob from the bucket
@@ -54,7 +53,6 @@ class GCPData:
 
         print("Blob {} downloaded to {}.".format(file_path, out_file))
 
-
     def get_all_data(self, bucket_name):
         """
         Retrieve all data from a container into a local file
@@ -64,7 +62,6 @@ class GCPData:
         for blob in objects:
             out_file = self.cwd + '/' + blob.name
             self.get_data(bucket_name, blob.name, out_file)
-
 
     def put_data(self, bucket_name, local_file_path, dest_file_path):
         """

@@ -32,7 +32,6 @@ class S3Data:
         self.s3_resource = S3Handler(config).resource
         self.s3_client = S3Handler(config).client
 
-
     def create_bucket(self, bucket_name, region=None):
         """Create an S3 bucket in a specified region
         """
@@ -46,7 +45,6 @@ class S3Data:
         except ClientError as e:
             print(e)
 
-
     def get_all_data(self, bucket_name, out_file):
         """
         Retrieve all data from a bucket into a local file
@@ -55,7 +53,6 @@ class S3Data:
         for obj in bucket.objects.all():
             self.get_data(bucket_name, obj.key, out_file)
 
-
     def get_data(self, bucket_name, object_name, out_file):
         """
         Get data from an existing S3 bucket
@@ -63,7 +60,6 @@ class S3Data:
         with open(out_file, 'ab') as f:
             self.s3_client.download_fileobj(bucket_name, object_name, f)
             print("Object {} downloaded to {}.".format(object_name, out_file))
-
 
     def put_data(self, bucket_name, file_name, object_name=None):
         """

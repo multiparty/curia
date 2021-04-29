@@ -25,14 +25,12 @@ class AzureData:
     def __init__(self, config):
         self.azure_client = AzureHandler(config).blob_service_client
 
-
     def create_container(self, container_name):
         """
         Create a container.
         """
         self.azure_client.create_container(container_name)
         print("Container {} created.".format(container_name))
-
 
     def get_data(self, container_name, file_path, out_file):
         """
@@ -43,7 +41,6 @@ class AzureData:
             download_file.write(blob_client.download_blob().readall())
             print("File {} downloaded to {}.".format(file_path, out_file))
 
-
     def get_all_data(self, container_name, out_file):
         """
         Retrieve all data from a container into a local file
@@ -52,7 +49,6 @@ class AzureData:
         blob_list = container_client.list_blobs()
         for blob in blob_list:
             self.get_data(container_name, blob.name, out_file)
-
 
     def put_data(self, container_name, file_path, blob_path):
         """
