@@ -51,13 +51,18 @@ class S3Data:
         """
         bucket = self.s3_resource.Bucket(bucket_name)
         for obj in bucket.objects.all():
-            self.get_data(bucket_name, obj.key, out_file)
+            self.get_data(bucket_name, obj.key, out_file, append=True)
 
-    def get_data(self, bucket_name, object_name, out_file):
+    def get_data(self, bucket_name, object_name, out_file, append=False):
         """
         Get data from an existing S3 bucket
         """
-        with open(out_file, 'ab') as f:
+        # default to overwrite scope, append if necessary
+        scope='wb'
+        if append:
+            scope='ab'
+
+        with open(out_file, scope) as f:
             self.s3_client.download_fileobj(bucket_name, object_name, f)
             print("Object {} downloaded to {}.".format(object_name, out_file))
 
