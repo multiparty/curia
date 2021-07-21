@@ -8,19 +8,31 @@ class S3Handler:
     Helper class for opening connection to s3 buckets. Handles authentication and configuration.
     """
 
-    def __init__(self, config):
-        self.resource = boto3.resource(
-            service_name='s3',
-            region_name=config['AWS_REGION'] or os.environ['AWS_REGION'],
-            aws_access_key_id=config['AWS_ACCESS_KEY_ID'] or os.environ['AWS_ACCESS_KEY_ID'],
-            aws_secret_access_key=config['AWS_SECRET_ACCESS_KEY'] or os.environ['AWS_SECRET_ACCESS_KEY']
-        )
+    def __init__(self, config, region):
 
-        self.client = boto3.client(
-            's3',
-            aws_access_key_id=config['AWS_ACCESS_KEY_ID'],
-            aws_secret_access_key=config['AWS_SECRET_ACCESS_KEY']
-        )
+        if not config and not region:
+            raise Exception("Please provide either a config object or a region")
+
+        elif not config:
+            self.resource = boto3.resource(
+                service_name='s3',
+                region_name=region,
+            )
+            self.client = boto3.client('s3', region_name=region)
+
+        else:
+            self.resource = boto3.resource(
+                service_name='s3',
+                region_name=config['AWS_REGION'] or os.environ['AWS_REGION'],
+                aws_access_key_id=config['AWS_ACCESS_KEY_ID'] or os.environ['AWS_ACCESS_KEY_ID'],
+                aws_secret_access_key=config['AWS_SECRET_ACCESS_KEY'] or os.environ['AWS_SECRET_ACCESS_KEY']
+            )
+
+            self.client = boto3.client(
+                's3',
+                aws_access_key_id=config['AWS_ACCESS_KEY_ID'],
+                aws_secret_access_key=config['AWS_SECRET_ACCESS_KEY']
+            )
 
 
 class S3Data:
@@ -28,9 +40,9 @@ class S3Data:
     Class for storing and retrieving data from Amazon Simple Storage Service (s3).
     """
 
-    def __init__(self, config):
-        self.s3_resource = S3Handler(config).resource
-        self.s3_client = S3Handler(config).client
+    def __init__(self, config=None, region=None):
+        self.s3_resource = S3Handler(config, region).resource
+        self.s3_client = S3Handler(config, region).client
 
     def create_bucket(self, bucket_name, region=None):
         """Create an S3 bucket in a specified region

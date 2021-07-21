@@ -3,18 +3,23 @@ Helper class for get_data and put_data
 Establishes swift connection and returns a connection object
 """
 import os
+from azure.identity import DefaultAzureCredential
 from azure.storage.blob import BlobServiceClient
 
 
 class AzureHandler:
-    def __init__(self, config):
+    def __init__(self, config, acct_url):
         """
         Returns a Swift connection object
         """
-
-        connect_str = config['AZURE_STORAGE_CONNECTION_STRING'] or os.getenv('AZURE_STORAGE_CONNECTION_STRING')
-
-        self.blob_service_client = BlobServiceClient.from_connection_string(connect_str)
+        if not config and not acct_url:
+            raise Exception("Please provide either a config object or an account URL")
+        elif not config:
+            credentials = DefaultAzureCredential()
+            self.blob_service_client = BlobServiceClient(credential=credentials, account_url=acct_url)
+        else:
+            connect_str = config['AZURE_STORAGE_CONNECTION_STRING'] or os.getenv('AZURE_STORAGE_CONNECTION_STRING')
+            self.blob_service_client = BlobServiceClient.from_connection_string(connect_str)
 
 
 class AzureData:
@@ -22,8 +27,8 @@ class AzureData:
     Upload files to a swift container, download files from a container, and create a container.
     """
 
-    def __init__(self, config):
-        self.azure_client = AzureHandler(config).blob_service_client
+    def __init__(self, config=None, acct_url=None):
+        self.azure_client = AzureHandler(config=config, acct_url=acct_url).blob_service_client
 
     def create_container(self, container_name):
         """

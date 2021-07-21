@@ -12,10 +12,12 @@ class GCPHandler:
         """
         Returns a Swift connection object
         """
-
-        cred_path = config['GOOGLE_APPLICATION_CREDENTIALS'] or os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
-        credentials = service_account.Credentials.from_service_account_file(cred_path)
-        self.storage_client = storage.Client(credentials=credentials)
+        if not config:
+            self.storage_client = storage.Client()
+        else:
+            cred_path = config['GOOGLE_APPLICATION_CREDENTIALS'] or os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
+            credentials = service_account.Credentials.from_service_account_file(cred_path)
+            self.storage_client = storage.Client(credentials=credentials)
 
 
 class GCPData:
@@ -23,7 +25,7 @@ class GCPData:
     Upload files to a swift container, download files from a container, and create a container.
     """
 
-    def __init__(self, config):
+    def __init__(self, config=None):
         self.gcp_client = GCPHandler(config).storage_client
         self.cwd = os.getcwd()
 
